@@ -2,17 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def recursive_hcat(x, c, n):
-    if n == 0:
-        return x
-    x = np.hstack((x, c))
-    return recursive_hcat(x, c, n - 1)
-
-
 pattern1 = np.hstack((np.zeros((20, 10)), np.ones((20, 10))))
 
-pattern2 = recursive_hcat(np.hstack((np.zeros((20, 2)), np.ones((20, 2)))),
-                          np.hstack((np.zeros((20, 2)), np.ones((20, 2)))), 4)
+pattern2 = np.tile(np.hstack((np.zeros((20, 2)), np.ones((20, 2)))), (1, 5))
 
 pattern3 = np.array([
     [0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
@@ -69,7 +61,7 @@ def lateral_inhibition(input_layer):
             for k in range(-1, 2):
                 for l in range(-1, 2):
                     x, y = i + k, j + l
-                    if 0 <= x < input_layer.shape[0] and 0 <= y < input_layer.shape[1]:
+                    if 0 <= x < input_layer.shape[0] and 0 <= y < input_layer.shape[1] and (k != 0 and l != 0):
                         activation_sum += input_layer[x, y] * -0.1
             activation_sum += input_layer[i, j] * 1.8
             out[i, j] = max(0, activation_sum)

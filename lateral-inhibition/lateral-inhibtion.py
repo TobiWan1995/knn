@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 pattern1 = np.hstack((np.zeros((20, 10)), np.ones((20, 10))))
 
 pattern2 = np.tile(np.hstack((np.zeros((20, 2)), np.ones((20, 2)))), (1, 5))
@@ -54,17 +53,19 @@ pattern4 = np.array([
 
 
 def lateral_inhibition(input_layer):
-    out = np.zeros_like(input_layer)
+    out = np.zeros((20, 20))
     for i in range(out.shape[0]):
         for j in range(out.shape[1]):
             activation_sum = 0.0
             for k in range(-1, 2):
                 for l in range(-1, 2):
                     x, y = i + k, j + l
-                    if 0 <= x < input_layer.shape[0] and 0 <= y < input_layer.shape[1] and (k != 0 and l != 0):
+                    if x == i and y == j:
+                        activation_sum += input_layer[x, y] * 1.8
+                    elif 0 <= x < input_layer.shape[0] and 0 <= y < input_layer.shape[1]:
                         activation_sum += input_layer[x, y] * -0.1
-            activation_sum += input_layer[i, j] * 1.8
-            out[i, j] = max(0, activation_sum)
+            # out[i, j] = max(0, activation_sum)
+            out[i, j] = activation_sum
     return out
 
 

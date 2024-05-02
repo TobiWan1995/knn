@@ -58,6 +58,3 @@ def predict(X, w, b, activation_function):
     print("Bias: ", b)
     return predictions
 
-# Die Verwendung würde dann so aussehen:
-# w, b = train(X, Y, w, n, b, sigmoid, 100)  # Trainieren für 100 Epochen mit sigmoid
-# predictions = predict(X, w, b, sigmoid)    # Vorhersagen machen mit sigmoid

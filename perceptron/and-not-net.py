@@ -11,8 +11,8 @@ def sigmoid(x):
 
 
 def forward(x, w, b):
-    # return sigmoid(x[0] * w[0] + x[1] * w[1] + b)
-    return relu(x[0] * w[0] + x[1] * w[1] + b)
+    return sigmoid(x[0] * w[0] + x[1] * w[1] + b)
+    # return relu(x[0] * w[0] + x[1] * w[1] + b)
 
 
 def predict(X, w, b):
@@ -37,7 +37,7 @@ def train(X, Y, w, n, b):
         dw[0] = n * delta * x[0]
         dw[1] = n * delta * x[1]
 
-        db = n * delta * b
+        db = n * delta * 1
 
         w += dw
         b += db
@@ -45,17 +45,17 @@ def train(X, Y, w, n, b):
     return w, b
 
 
-xtrn = [[0, 0], [0, 1], [1, 0], [1, 1]]
+xtrn = [[0., 0.], [0., 1.], [1., 0.], [1., 1.]]
 N = 0.1  # lernrate
 
 ## and-net
 print("----------and-net---------")
 
-ytrn = [0, 0, 0, 1]
+ytrn = [0., 0., 0., 1.]
 W = random.rand(2)
-bias = 0.5
+bias = 0.0
 
-for m in range(1, 50):
+for m in range(1, 100):
     W, bias = train(xtrn, ytrn, W, N, bias)
 
 predict(xtrn, W, bias)
@@ -63,11 +63,11 @@ predict(xtrn, W, bias)
 ## not-net
 print("----------not-net---------")
 
-ytrn = [1, 0, 0, 0]
+ytrn = [1., 0., 0., 0.]
 W = random.rand(2)
 bias = 0.2
 
-for m in range(1, 50):
+for m in range(1, 100):
     W, bias = train(xtrn, ytrn, W, N, bias)
 
 predict(xtrn, W, bias)

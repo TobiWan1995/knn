@@ -20,7 +20,7 @@ def mse_cost(predicted, actual):
     return anp.mean((predicted - actual) ** 2)
 
 
-def train(X, Y, w, n, b, activation_function, epochs, mode='online', batch_size=1):
+def train_layer(X, Y, w, n, b, activation_function, epochs, mode='online', batch_size=1):
     # Gradient der Kostenfunktion berechnen
     cost_function_gradient = grad(mse_cost)
 
@@ -86,3 +86,5 @@ def predict(X, w, b, activation_function):
         print(f"Pattern {i}: {o}")
 
     return predictions
+
+

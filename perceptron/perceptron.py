@@ -1,5 +1,5 @@
 import numpy as np
-from utils import knn_utils
+from utils import knn_utils_01 as k
 
 # Angenommen, jede Form ist ein 5x5 Bild, flach gemacht zu einem 25-elementigen Vektor
 plus = np.load("./shapes/plus.npy").flatten()
@@ -8,8 +8,11 @@ times = np.load("./shapes/times.npy").flatten()
 divide = np.load("./shapes/divide.npy").flatten()
 ball = np.load("./shapes/ball.npy").flatten()
 
+
+
 # Vorbereiten der Trainingsdaten als 2D-Array
 xtrn = np.vstack((plus, minus, times, divide, ball))  # (5, 25)
+print(xtrn)
 xtrn = np.tile(xtrn, (2, 1))  # (10, 25)
 
 # Trainingslabels
@@ -34,7 +37,7 @@ learning_rate = 0.1
 epochs = 500
 
 # Training des Perceptrons
-w, b = knn_utils.train(xtrn, ytrn, w, learning_rate, b, knn_utils.sigmoid, epochs, mode="batch", batch_size=2)
+w, b = k.train_layer(xtrn, ytrn, w, learning_rate, b, k.sigmoid, epochs, mode="batch", batch_size=2)
 
 # Vorhersagen mit dem trainierten Perceptron machen
-knn_utils.predict(xtrn, w, b, knn_utils.sigmoid)
+k.predict(xtrn, w, b, k.sigmoid)

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from keras.src.datasets import mnist
 from utils import knn_utils_02 as k
+from utils import  knn_helper as kh
 
 # MNIST-Daten laden (mnist dim 28x28 with 10 classes)
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -25,57 +26,39 @@ for i in range(10):
 
 # Netzwerk initialisieren (Normal)
 layers = [
-    k.DenseLayer(784, 256, acf=k.sigmoid),
-    k.DenseLayer(256, 256, acf=k.sigmoid),
-    k.DenseLayer(256, 10, acf=k.sigmoid)
+    k.DenseLayer(784, 256, acf=kh.sigmoid),
+    k.DenseLayer(256, 256, acf=kh.sigmoid),
+    k.DenseLayer(256, 10, acf=kh.softmax)
 ]
 
-mlp = k.MLP(*layers)
+mlp = k.MLP(*layers, cost=kh.nll)
 
 # Training des Netzwerks
-k.train(mlp, x_train.T, y_train_encoded.T, epochs=100, lr=0.01)
+k.train(mlp, x_train.T, y_train_encoded.T, epochs=500, lr=0.0001, batch_size=20)
 
 # Netzwerk initialisieren (klein)
 layers_small = [
-    k.DenseLayer(784, 128, acf=k.sigmoid),
-    k.DenseLayer(128, 64, acf=k.sigmoid),
-    k.DenseLayer(64, 10, acf=k.sigmoid)
+    k.DenseLayer(784, 128, acf=kh.sigmoid),
+    k.DenseLayer(128, 64, acf=kh.sigmoid),
+    k.DenseLayer(64, 10, acf=kh.sigmoid)
 ]
 
-mlp_small = k.MLP(*layers_small, cost=k.nll)
+mlp_small = k.MLP(*layers_small)
 
 # Training des Netzwerks
-# k.train(mlp_small, x_train.T, y_train_encoded.T, epochs=10, lr=0.000001)
+# k.train(mlp_small, x_train.T, y_train_encoded.T, epochs=50, lr=0.00001, batch_size=50)
 
 # Netzwerk initialisieren (winzig)
 layers_smaller = [
-    k.DenseLayer(784, 64, acf=k.sigmoid),
-    k.DenseLayer(64, 10, acf=k.sigmoid)
+    k.DenseLayer(784, 64, acf=kh.sigmoid),
+    k.DenseLayer(64, 10, acf=kh.sigmoid)
 ]
 
-mlp_smaller = k.MLP(*layers_smaller)
+mlp_smaller = k.MLP(*layers_smaller, cost=kh.mse_cost)
 
 # Training des Netzwerks
-# k.train(mlp_smaller, x_train.T, y_train_encoded.T, epochs=100, lr=0.01)
+# k.train(mlp_smaller, x_train.T, y_train_encoded.T, epochs=50, lr=0.00001, batch_size=50)
 
-def accuracy(predicted, actual):
-    """
-    Berechnet die Genauigkeit eines Klassifizierungsmodells.
-
-    :param predicted: Vorhergesagte Wahrscheinlichkeiten [n_classes, n_samples]
-    :param actual: Tatsächliche Labels in One-Hot-Encoded Form [n_classes, n_samples]
-    :return: Accuracy als Skalar
-    """
-    # Bestimme die Klasse mit der höchsten Wahrscheinlichkeit für jede Vorhersage
-    predicted_classes = np.argmax(predicted, axis=0)
-    # Extrahiere die tatsächlichen Klassen aus den One-Hot-Encoded Labels
-    actual_classes = np.argmax(actual, axis=0)
-    # Berechne die Genauigkeit
-    accuracy = np.mean(predicted_classes == actual_classes)
-    return accuracy
-
-
-# Angenommen, deine 'MLP' Klasse hat eine Methode namens 'predict', die die Wahrscheinlichkeiten zurückgibt
-predicted = mlp.predict(x_test.T)  # Stelle sicher, dass x_test die richtige Form hat
-accuracy_score = accuracy(predicted[0], y_test_encoded.T)  # y_test_encoded sollte auch die korrekte Form haben
+predicted = mlp_smaller.predict(x_test.T)
+accuracy_score = k.accuracy(predicted[0], y_test_encoded.T)
 print("Accuracy:", accuracy_score)

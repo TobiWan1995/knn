@@ -1,14 +1,7 @@
 import numpy as np
+from utils import knn_helper as kh
 import autograd.numpy as anp
 from autograd import grad
-
-
-def relu(x):
-    return anp.maximum(0, x)
-
-
-def sigmoid(x):
-    return 1 / (1 + anp.exp(-x))
 
 
 def forward(x, w, b, activation_function):
@@ -16,13 +9,9 @@ def forward(x, w, b, activation_function):
     return activation_function(z)
 
 
-def mse_cost(predicted, actual):
-    return anp.mean((predicted - actual) ** 2)
-
-
 def train_layer(X, Y, w, n, b, activation_function, epochs, mode='online', batch_size=1):
     # Gradient der Kostenfunktion berechnen
-    cost_function_gradient = grad(mse_cost)
+    cost_function_gradient = grad(kh.mse_cost)
 
     # Modus-Parameter prüfen
     if mode not in ['online', 'batch']:

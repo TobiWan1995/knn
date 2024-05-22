@@ -14,6 +14,11 @@ def softmax(x):
     exp_x = anp.exp(x - anp.max(x, axis=0)) # subtract max to improve numerical stability
     return exp_x / anp.sum(exp_x, axis=0)
 
+def tanh(x):
+    return anp.tanh(x)
+
+def tanh_prime(x):
+    return 1 - anp.tanh(x)**2
 
 '''Kostenfunktionen - Loss-Funktionen'''
 def mse_cost(predicted, actual):
@@ -29,7 +34,7 @@ def bce(o, t):
     # Berechnung des binären Kreuzentropie-Loss
     # t * anp.log(o): Logarithmische Verlustbeiträge für die vorhergesagten positiven Klassen
     # (1 - t) * anp.log(1 - o): Logarithmische Verlustbeiträge für die vorhergesagten negativen Klassen
-    return -anp.sum(t * anp.log(o) + (1 - t) * anp.log(1 - o))
+    return -anp.mean(t * anp.log(o) + (1 - t) * anp.log(1 - o))
 
 
 def nll(p, y):

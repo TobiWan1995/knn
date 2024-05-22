@@ -50,11 +50,15 @@ layers = [
 mlp = k.MLP(*layers, cost=kh.bce)
 
 # Training des Netzwerks
-k.train(mlp, x_train.T, y_train_encoded.T, epochs=1000, lr=0.0001)
+# k.train(mlp, x_train.T, y_train_encoded.T, epochs=1000, lr=0.001)
+
+predicted = mlp.predict(x_test.T)
+accuracy_score = k.accuracy(predicted[0], y_test_encoded.T)
+print("Accuracy:", accuracy_score)
 
 # Netzwerk initialisieren (klein)
 layers_big = [
-    k.DenseLayer(784, 128, acf=kh.relu),
+    k.DenseLayer(784, 512, acf=kh.relu),
     k.DenseLayer(512, 256, acf=kh.relu),
     k.DenseLayer(256, 128, acf=kh.relu),
     k.DenseLayer(128, 64, acf=kh.relu),
@@ -63,8 +67,12 @@ layers_big = [
 
 mlp_big = k.MLP(*layers_big, cost=kh.bce)
 
+predicted = mlp_big.predict(x_test.T)
+accuracy_score = k.accuracy(predicted[0], y_test_encoded.T)
+print("Accuracy:", accuracy_score)
+
 # Training des Netzwerks
-# k.train(mlp_small, x_train.T, y_train_encoded.T, epochs=50, lr=0.00001, batch_size=50)
+k.train(mlp_big, x_train.T, y_train_encoded.T, epochs=1000, lr=0.001)
 
 # Netzwerk initialisieren (winzig)
 layers_smaller = [
@@ -75,7 +83,7 @@ layers_smaller = [
 mlp_smaller = k.MLP(*layers_smaller, cost=kh.bce)
 
 # Training des Netzwerks
-k.train(mlp_smaller, x_train.T, y_train_encoded.T, epochs=1000, lr=0.01)
+# k.train(mlp_smaller, x_train.T, y_train_encoded.T, epochs=1000, lr=0.01)
 
 predicted = mlp_smaller.predict(x_test.T)
 accuracy_score = k.accuracy(predicted[0], y_test_encoded.T)

@@ -40,15 +40,18 @@ class MLP:
 
 
 def batch_generator(x, y, batch_size):
-    num_batches = int(anp.ceil(x.shape[1] / batch_size))  # Anzahl der Batches basierend auf der Anzahl der Muster
-    indices = anp.arange(x.shape[1])  # Indizes basierend auf der Anzahl der Muster
-    anp.random.shuffle(indices)  # Zufällige Permutation der Indizes
+    if batch_size is None:
+        yield x, y
+    else:
+        num_batches = int(anp.ceil(x.shape[1] / batch_size))  # Anzahl der Batches basierend auf der Anzahl der Muster
+        indices = anp.arange(x.shape[1])  # Indizes basierend auf der Anzahl der Muster
+        anp.random.shuffle(indices)  # Zufällige Permutation der Indizes
 
-    for i in range(num_batches):
-        start_idx = i * batch_size
-        end_idx = min((i + 1) * batch_size, x.shape[1])  # Endindex begrenzen, um Überlauf zu vermeiden
-        batch_indices = indices[start_idx:end_idx]
-        yield x[:, batch_indices], y[:, batch_indices]  # Transponierte Daten verwenden, um Musterweise zu arbeiten
+        for i in range(num_batches):
+            start_idx = i * batch_size
+            end_idx = min((i + 1) * batch_size, x.shape[1])  # Endindex begrenzen, um Überlauf zu vermeiden
+            batch_indices = indices[start_idx:end_idx]
+            yield x[:, batch_indices], y[:, batch_indices]  # Transponierte Daten verwenden, um Musterweise zu arbeiten
 
 
 def update_params(layer, delta, layer_acf_out, lr):
@@ -58,16 +61,13 @@ def update_params(layer, delta, layer_acf_out, lr):
     layer.b -= lr * grad_b  # Aktualisieren des Bias
 
 
-# Definition der Trainingsfunktion mit Batchverarbeitung
+# Definition der Trainingsfunktion mit Batch-Verarbeitung
 def train(mlp, x, y, epochs=1, lr=0.001, batch_size=None):
     def loss_fn(o, y):
         return mlp(o, y)
 
     # Berechnung des Gradienten der Verlustfunktion
     gradient_fn = grad(loss_fn, argnum=0)
-
-    if batch_size is None:
-        batch_size = x.shape[1]  # Wenn keine Batch-Größe angegeben ist, verwende die gesamte Datenmenge als Batch
 
     for epoch in range(epochs):
         for batch_index, (x_batch, y_batch) in enumerate(batch_generator(x, y, batch_size)):
@@ -79,21 +79,24 @@ def train(mlp, x, y, epochs=1, lr=0.001, batch_size=None):
             # Backpropagation durch die Schichten
             for layer_index in reversed(range(len(mlp.layers))):
                 layer = mlp.layers[layer_index]
+                layer_acf_in, layer_acf_out = layer_outputs[layer_index - 1]  # Aktivierungen der vorherigen Schicht
 
                 if layer_index > 0:
-                    layer_acf_in, layer_acf_out = layer_outputs[layer_index - 1]  # Aktivierungen der vorherigen Schicht
-                    layer_w_old = layer.w  # Alte Gewichte vor Aktualisierung zwischenspeichern (neues Delta)
-                    update_params(layer, delta, layer_acf_out, lr)  # Alte Gewichte aktualisieren
+                    # Alte Gewichte vor Aktualisierung zwischenspeichern (neues Delta)
+                    layer_w_old = layer.w
+                    # Alte Gewichte aktualisieren
+                    update_params(layer, delta, layer_acf_out, lr)
                     # Berechnung der Gradienten der vorherigen Schicht
                     delta = anp.dot(layer_w_old.T, delta) * layer.acf_prime(layer_acf_in)
                 else:
-                    layer_acf_out = x_batch  # Wenn es die erste Schicht ist, verwende die Eingabe
-                    update_params(layer, delta, layer_acf_out, lr)
+                    # Wenn es die erste Schicht ist, verwende die Eingabe
+                    update_params(layer, delta, x_batch, lr)
 
             current_loss = mlp(output, y_batch)
 
-            if batch_index == 1:  # Prüfen, ob der aktuelle Batch ein Quantilpunkt ist
-                print(f"Epoch {epoch + 1}: loss = {current_loss / batch_size}")
+            # Loss nur in der ersten Epoche und dann alle 10 Epochen ausgeben
+            if (epoch == 0 or (epoch + 1) % 100 == 0) and (batch_size is None or batch_index == 1):
+                print(f"Epoch {epoch + 1}: loss = {current_loss}")
 
 
 def accuracy(predicted, actual):

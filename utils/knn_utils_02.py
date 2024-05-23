@@ -6,12 +6,19 @@ from utils import knn_helper as kh
 
 # Definition des neuronalen Netzes
 class DenseLayer:
-    def __init__(self, input_dim, output_dim, acf=kh.relu):
-        # HE-Initialisierung
-        self.w = anp.random.randn(output_dim, input_dim) * anp.sqrt(2. / input_dim)
-        self.b = anp.zeros((output_dim, 1))
+    def __init__(self, input_dim, output_dim, acf=kh.relu, init_type='he'):
         self.acf = acf
-        self.acf_prime = elementwise_grad(acf)  # Berechnung der Ableitung der Aktivierungsfunktion
+        self.acf_prime = elementwise_grad(self.acf)  # Berechnung der Ableitung der Aktivierungsfunktion
+        self.b = anp.zeros((output_dim, 1))
+
+        if init_type == 'he':
+            # He-Initialisierung (auch Kaiming-Initialisierung genannt)
+            self.w = anp.random.randn(output_dim, input_dim) * anp.sqrt(2. / input_dim)
+        elif init_type == 'xavier':
+            # Xavier-Initialisierung (auch Glorot-Initialisierung genannt)
+            self.w = anp.random.randn(output_dim, input_dim) * anp.sqrt(1. / input_dim)
+        else:
+            raise ValueError("Unsupported initialization type. Choose 'he' or 'xavier'.")
 
     def forward(self, x):
         acf_in = anp.dot(self.w, x) + self.b

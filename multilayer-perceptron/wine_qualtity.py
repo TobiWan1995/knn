@@ -49,6 +49,7 @@ X_white_norm, Y_white_norm = normalize_wine_data(X_white, Y_white)
 # Aufteilen in Trainings- und Testdaten
 X_white_train, X_white_test, Y_white_train, Y_white_test = train_test_split(X_white_norm, Y_white_norm, test_size=0.2,
                                                                             random_state=42)
+''''Aufgabe 3'''
 
 # Netzwerk initialisieren
 layers = [

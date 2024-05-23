@@ -56,7 +56,7 @@ predicted = mlp.predict(x_test.T)
 accuracy_score = k.accuracy(predicted[0], y_test_encoded.T)
 print("Accuracy:", accuracy_score)
 
-# Netzwerk initialisieren (klein)
+# Netzwerk initialisieren (big)
 layers_big = [
     k.DenseLayer(784, 512, acf=kh.relu),
     k.DenseLayer(512, 256, acf=kh.relu),
@@ -67,12 +67,12 @@ layers_big = [
 
 mlp_big = k.MLP(*layers_big, cost=kh.bce)
 
+# Training des Netzwerks
+k.train(mlp_big, x_train.T, y_train_encoded.T, epochs=1000, lr=0.001)
+
 predicted = mlp_big.predict(x_test.T)
 accuracy_score = k.accuracy(predicted[0], y_test_encoded.T)
 print("Accuracy:", accuracy_score)
-
-# Training des Netzwerks
-k.train(mlp_big, x_train.T, y_train_encoded.T, epochs=1000, lr=0.001)
 
 # Netzwerk initialisieren (winzig)
 layers_smaller = [

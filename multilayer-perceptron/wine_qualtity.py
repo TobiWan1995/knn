@@ -102,13 +102,13 @@ erkennen zu können wie Weißweine?'''
 
 mlp_red = k.MLP(*layers, cost=kh.mse_cost)
 
-# k.train(mlp_red, X_red_train.T, Y_red_train.T, epochs=1000, lr=0.01)
+k.train(mlp_red, X_red_train.T, Y_red_train.T, epochs=1000, lr=0.01)
 
-# train_accuracy_red = evaluate_accuracy(mlp_red, X_red_train.T, Y_red_train.T)
-# test_accuracy_red = evaluate_accuracy(mlp_red, X_red_test.T, Y_red_test.T)
+train_accuracy_red = evaluate_accuracy(mlp_red, X_red_train.T, Y_red_train.T)
+test_accuracy_red = evaluate_accuracy(mlp_red, X_red_test.T, Y_red_test.T)
 
-# print(f'Train Accuracy red: {train_accuracy_red}')
-#  print(f'Test Accuracy red: {test_accuracy_red}')
+print(f'Train Accuracy red: {train_accuracy_red}')
+print(f'Test Accuracy red: {test_accuracy_red}')
 
 '''4. Kann es hilfreich sein, dem MLP für Weißweine einige Rotweinbeispiele
 zu zeigen (training), um eine gute Leistung für Rotweine zu erzielen?'''

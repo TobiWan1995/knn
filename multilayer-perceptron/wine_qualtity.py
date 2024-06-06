@@ -1,5 +1,5 @@
 from ucimlrepo import fetch_ucirepo
-from utils import knn_helper as kh
+from utils import acf as kh
 from utils import knn_utils_02 as k
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -32,6 +32,7 @@ def filter_wine_color(x, y, color):
 
     # Entfernen Sie die Spalte 'color' aus den Features
     x_c = x_c.drop(columns=['color'])
+    x_c = x_c.drop(columns=['quality'])
     return x_c, y_c
 
 
@@ -53,8 +54,8 @@ X_white_train, X_white_test, Y_white_train, Y_white_test = train_test_split(X_wh
 
 # Netzwerk initialisieren
 layers = [
-    k.DenseLayer(12, 64, acf=kh.tanh),
-    k.DenseLayer(64, 64, acf=kh.tanh),
+    k.DenseLayer(11, 64, acf=kh.sigmoid),
+    k.DenseLayer(64, 64, acf=kh.sigmoid),
     k.DenseLayer(64, 1, acf=kh.idx)  # Lineare Ausgabe
 ]
 
@@ -101,18 +102,18 @@ erkennen zu können wie Weißweine?'''
 
 mlp_red = k.MLP(*layers, cost=kh.mse_cost)
 
-k.train(mlp_red, X_red_train.T, Y_red_train.T, epochs=1000, lr=0.01)
+# k.train(mlp_red, X_red_train.T, Y_red_train.T, epochs=1000, lr=0.01)
 
-train_accuracy_red = evaluate_accuracy(mlp_red, X_red_train.T, Y_red_train.T)
-test_accuracy_red = evaluate_accuracy(mlp_red, X_red_test.T, Y_red_test.T)
+# train_accuracy_red = evaluate_accuracy(mlp_red, X_red_train.T, Y_red_train.T)
+# test_accuracy_red = evaluate_accuracy(mlp_red, X_red_test.T, Y_red_test.T)
 
-print(f'Train Accuracy red: {train_accuracy_red}')
-print(f'Test Accuracy red: {test_accuracy_red}')
+# print(f'Train Accuracy red: {train_accuracy_red}')
+#  print(f'Test Accuracy red: {test_accuracy_red}')
 
 '''4. Kann es hilfreich sein, dem MLP für Weißweine einige Rotweinbeispiele
 zu zeigen (training), um eine gute Leistung für Rotweine zu erzielen?'''
 
-k.train(mlp_white, X_red_train.T, Y_red_train.T, epochs=100, lr=0.01)
+k.train(mlp_white, X_red_train.T, Y_red_train.T, epochs=10, lr=0.01)
 
 train_accuracy_white_red = evaluate_accuracy(mlp_white, X_red_train.T, Y_red_train.T)
 test_accuracy_white_red = evaluate_accuracy(mlp_white, X_red_test.T, Y_red_test.T)

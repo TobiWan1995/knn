@@ -1,12 +1,12 @@
 import numpy as np
 from autograd import grad, elementwise_grad
 import autograd.numpy as anp
-from utils import knn_helper as kh
+from utils import acf as acf
 
 
 # Definition des neuronalen Netzes
 class DenseLayer:
-    def __init__(self, input_dim, output_dim, acf=kh.relu, init_type='he'):
+    def __init__(self, input_dim, output_dim, acf=acf.relu, init_type='he'):
         self.acf = acf
         self.acf_prime = elementwise_grad(self.acf)  # Berechnung der Ableitung der Aktivierungsfunktion
         self.b = anp.zeros((output_dim, 1))
@@ -30,7 +30,7 @@ class DenseLayer:
 
 
 class MLP:
-    def __init__(self, *layers, cost=kh.mse_cost):
+    def __init__(self, *layers, cost=acf.mse_cost):
         self.layers = layers
         self.cost = cost
 

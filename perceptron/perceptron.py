@@ -37,7 +37,7 @@ learning_rate = 0.1
 epochs = 500
 
 # Training des Perceptrons
-w, b = k.train_layer(xtrn, ytrn, w, learning_rate, b, k.sigmoid, epochs, mode="batch", batch_size=2)
+w, b = k.train_layer(xtrn, ytrn, w, learning_rate, b, k.sigmoid, epochs)
 
 # Vorhersagen mit dem trainierten Perceptron machen
 k.predict(xtrn, w, b, k.sigmoid)

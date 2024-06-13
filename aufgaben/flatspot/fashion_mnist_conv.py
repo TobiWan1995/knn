@@ -28,4 +28,4 @@ criterion = nn.CrossEntropyLoss()  # Beispiel für Mehrklassenklassifikation
 
 conv_model = MultiLayerModel(layers, loss_fn=criterion, task='multiclass', num_classes=10)
 
-train_torch(conv_model, train_loader, valid_loader, epochs=20, lr=0.001, title="Fashion_MNIST_Conv")
+train_torch(conv_model, train_loader, valid_loader, epochs=100, lr=0.001, title="Fashion_MNIST_Conv_100")

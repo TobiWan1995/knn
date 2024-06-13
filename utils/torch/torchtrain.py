@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.optim as optim
 import torchmetrics
@@ -27,7 +29,8 @@ def train_torch(model, train_loader, valid_loader=None, epochs=1, lr=0.001, warm
     if title is None:
         title = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-    path = f"C:/Users/walte/github/knn/summary/{title}"
+    base_path = os.path.dirname(os.path.abspath(__file__))  # Absoluter Pfad zum Verzeichnis dieser Datei
+    path = os.path.join(base_path, '..', '..', 'summary', title)  # Relativer Pfad zum 'summary'-Ordner
     writer = SummaryWriter(log_dir=path, comment=title)
 
     for epoch in range(epochs):

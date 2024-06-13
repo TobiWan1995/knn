@@ -1,8 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from keras.src.datasets import mnist
-from utils import knn_utils_02 as k
-from utils import acf as acf
+from utils.diy import knn_utils_02 as k, acf as acf
 
 # MNIST-Daten laden (mnist dim 28x28 with 10 classes)
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -22,7 +21,7 @@ rows = 4
 fig, axes = plt.subplots(rows, 3, figsize=(12, 12))
 for i in range(12):  # Gehe von 0 bis 11, für 12 Bilder
     row = i // 3  # Bestimmt die Reihe
-    col = i % 3   # Bestimmt die Spalte
+    col = i % 3  # Bestimmt die Spalte
     if i < 10:
         mean_img = np.mean(x_train[y_train == i], axis=0)
         ax = axes[row, col]
@@ -70,8 +69,19 @@ mlp_big = k.MLP(*layers_big, cost=acf.bce)
 # Training des Netzwerks
 k.train(mlp_big, x_train.T, y_train_encoded.T, epochs=1000, lr=0.001)
 
+
+def accuracy(predicted, actual):
+    # Bestimme die Klasse mit der höchsten Wahrscheinlichkeit für jede Vorhersage
+    predicted_classes = np.argmax(predicted, axis=0)
+    # Extrahiere die tatsächlichen Klassen aus den One-Hot-Encoded Labels
+    actual_classes = np.argmax(actual, axis=0)
+    # Berechne die Genauigkeit
+    accuracy = np.mean(predicted_classes == actual_classes)
+    return accuracy
+
+
 predicted = mlp_big.predict(x_test.T)
-accuracy_score = k.accuracy(predicted[0], y_test_encoded.T)
+accuracy_score = accuracy(predicted[0], y_test_encoded.T)
 print("Accuracy:", accuracy_score)
 
 # Netzwerk initialisieren (winzig)
@@ -86,5 +96,5 @@ mlp_smaller = k.MLP(*layers_smaller, cost=acf.bce)
 # k.train(mlp_smaller, x_train.T, y_train_encoded.T, epochs=1000, lr=0.01)
 
 predicted = mlp_smaller.predict(x_test.T)
-accuracy_score = k.accuracy(predicted[0], y_test_encoded.T)
+accuracy_score = accuracy(predicted[0], y_test_encoded.T)
 print("Accuracy:", accuracy_score)

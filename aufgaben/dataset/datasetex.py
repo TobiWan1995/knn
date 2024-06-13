@@ -1,6 +1,5 @@
-from dataset.columndataset import ColumnDataset
-from utils import acf as acf
-from utils import knn_utils_02 as k
+from utils.data.columndataset import ColumnDataset
+from utils.diy import knn_utils_02 as k, acf as acf
 import autograd.numpy as anp
 
 """
@@ -28,7 +27,8 @@ dataset.preprocessor.normalize_columns()
 # Nutzung der get_splits Methode zur Aufteilung in Trainings-, Validierungs- und Testdaten
 train_loader, valid_loader, test_loader = dataset.get_splits(train_frac=0.7, valid_frac=0.15, batch_size=32)
 
-# Konvertieren der DataLoader zu numpy arrays für die Verwendung im neuronalen Netz
+# Konvertieren der DataLoader zu numpy arrays für die Verwendung im neuronalen Netz.
+# Wird gemacht, da im eigenen MLP bereits Batches festlegt werden....
 X_train = anp.concatenate([x for x, _ in train_loader], axis=0)
 Y_train = anp.concatenate([y for _, y in train_loader], axis=0)
 X_valid = anp.concatenate([x for x, _ in valid_loader], axis=0)
@@ -46,29 +46,18 @@ layers = [
 mlp_adult = k.MLP(*layers, cost=acf.mse_cost)
 
 # Training des neuronalen Netzes
-k.train(mlp_adult, X_train.T, Y_train.T, epochs=1000, lr=0.01)
-
-
-# Funktion zur Berechnung der Genauigkeit
-def calculate_accuracy(y_true, y_pred):
-    y_pred_rounded = anp.round(y_pred)
-    accuracy = anp.mean(y_true == y_pred_rounded)
-    return accuracy
+k.train(mlp_adult, X_train.T, Y_train.T, x_valid=X_valid.T, y_valid=Y_valid.T, epochs=1000, lr=0.01)
 
 
 # Evaluieren der Genauigkeit des neuronalen Netzes
-def evaluate_accuracy(mlp, X, y):
+def evaluate_accuracy(mlp, X, Y):
     y_pred, _ = mlp.predict(X)
-    accuracy = calculate_accuracy(y, y_pred)
+    accuracy = mlp.accuracy(y_pred, Y)
     return accuracy
 
 
-# Berechnung der Genauigkeit auf dem Trainings-, Validierungs- und Testdatensatz
-train_accuracy = evaluate_accuracy(mlp_adult, X_train.T, Y_train.T)
-valid_accuracy = evaluate_accuracy(mlp_adult, X_valid.T, Y_valid.T)
+# Berechnung der Genauigkeit auf dem Testdatensatz
 test_accuracy = evaluate_accuracy(mlp_adult, X_test.T, Y_test.T)
-
-# Ausgabe der Ergebnisse
-print(f'Train Accuracy: {train_accuracy}')
-print(f'Validation Accuracy: {valid_accuracy}')
 print(f'Test Accuracy: {test_accuracy}')
+
+

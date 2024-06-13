@@ -1,10 +1,10 @@
 import numpy as np
-from utils import acf as kh
+from utils.diy import acf as kh
 import autograd.numpy as anp
 from autograd import grad
 
 
-def forward(x, w, b, activation_function):
+def forward_layer(x, w, b, activation_function):
     z = anp.dot(x, w) + b
     return activation_function(z)
 
@@ -26,7 +26,7 @@ def train_layer(X, Y, w, n, b, activation_function, epochs):
             y = np.array(Y[i], dtype=np.float64)
 
             # Vorwärtsdurchlauf
-            o = forward(x, w, b, activation_function)
+            o = forward_layer(x, w, b, activation_function)
 
             # Gradienten berechnen
             cost_grad_wrt_output = cost_function_gradient(o, y)
@@ -40,11 +40,11 @@ def train_layer(X, Y, w, n, b, activation_function, epochs):
     return w, b
 
 
-def predict(X, w, b, activation_function):
+def predict_perceptron(X, w, b, activation_function):
     predictions = []
 
     # Verarbeiten aller Eingaben in einem Durchlauf
-    O = forward(np.array(X), w, b, activation_function)
+    O = forward_layer(np.array(X), w, b, activation_function)
 
     # Ausgabe der Vorhersagen
     print("-----------------Predictions-----------------")

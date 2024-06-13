@@ -1,26 +1,36 @@
-import autograd.numpy as anp # need to use autograd numpy to use grad
+import autograd.numpy as anp  # need to use autograd numpy to use grad
 
 '''Aktivierungsfunktionen'''
+
+
 def idx(x):
     return x
+
 
 def relu(x):
     return anp.maximum(0, x)
 
+
 def sigmoid(x):
     return 1 / (1 + anp.exp(-x))
 
+
 def softmax(x):
-    exp_x = anp.exp(x - anp.max(x, axis=0)) # subtract max to improve numerical stability
+    exp_x = anp.exp(x - anp.max(x, axis=0))  # subtract max to improve numerical stability
     return exp_x / anp.sum(exp_x, axis=0)
+
 
 def tanh(x):
     return anp.tanh(x)
 
+
 def tanh_prime(x):
-    return 1 - anp.tanh(x)**2
+    return 1 - anp.tanh(x) ** 2
+
 
 '''Kostenfunktionen - Loss-Funktionen'''
+
+
 def mse_cost(predicted, actual):
     return anp.mean((predicted - actual) ** 2)
 

@@ -1,6 +1,6 @@
 import os
 from PIL import Image
-from basedataset import *
+from utils.data.basedataset import BaseDataset
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as TF

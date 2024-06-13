@@ -2,8 +2,7 @@ import numpy as np
 import torch
 from torch import Generator
 from torch.utils.data import Dataset, DataLoader, random_split
-
-from utils.preprocess import Preprocessor
+from utils.data.preprocess import Preprocessor
 
 
 def custom_collate(batch):

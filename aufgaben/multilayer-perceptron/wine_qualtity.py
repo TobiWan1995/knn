@@ -1,6 +1,5 @@
 from ucimlrepo import fetch_ucirepo
-from utils import acf as kh
-from utils import knn_utils_02 as k
+from utils.diy import knn_utils_02 as k, acf as kh
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 import autograd.numpy as anp
@@ -52,7 +51,7 @@ X_white_train, X_white_test, Y_white_train, Y_white_test = train_test_split(X_wh
                                                                             random_state=42)
 ''''Aufgabe 3'''
 
-# Netzwerk initialisieren
+# Netzwerk initialisieren (Regression)
 layers = [
     k.DenseLayer(11, 64, acf=kh.sigmoid),
     k.DenseLayer(64, 64, acf=kh.sigmoid),

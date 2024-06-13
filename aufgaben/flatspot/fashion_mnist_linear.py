@@ -4,7 +4,6 @@ from torchvision import datasets, transforms
 from utils.torch.torchlayers import *
 from utils.torch.torchtrain import *
 
-
 # Transformation, um die Daten zu flachen
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -21,8 +20,8 @@ valid_loader = DataLoader(valid_dataset, batch_size=32, shuffle=False)
 
 # Initialisierung des Netzwerks nur mit Linear-Layern
 layers = [
-    DenseLayer(input_dim=28*28, output_dim=128, acf=f.relu, init_type='he'),
-    DenseLayer(input_dim=128, output_dim=64                            , acf=f.relu, init_type='he'),
+    DenseLayer(input_dim=28 * 28, output_dim=128, acf=f.relu, init_type='he'),
+    DenseLayer(input_dim=128, output_dim=64, acf=f.relu, init_type='he'),
     DenseLayer(input_dim=64, output_dim=10, acf=f.softmax(dim=1), init_type='he')  # Softmax für CrossEntropyLoss
 ]
 criterion = nn.CrossEntropyLoss()  # Beispiel für Mehrklassenklassifikation

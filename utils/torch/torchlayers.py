@@ -24,7 +24,10 @@ class LayerWrapper(nn.Module):
     def forward(self, x):
         x = self.layer(x)
         if self.acf:
-            x = self.acf(x)
+            if self.acf == f.softmax:
+                x = self.acf(x, dim=1)  # Softmax benötigt die Dimension
+            else:
+                x = self.acf(x)
         return x
 
 

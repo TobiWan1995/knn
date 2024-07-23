@@ -1,49 +1,71 @@
-from torchvision import models
 from utils.torch.torchlayers import *
 
-# Funktion zum Erstellen von Modellen
-def create_model(model_name, num_classes):
-    if model_name == 'vgg16':
-        model = models.vgg16(pretrained=True)
-        num_ftrs = model.classifier[6].in_features
-        model.classifier[6] = nn.Linear(num_ftrs, num_classes)
-    else:
-        raise ValueError("Modellname nicht erkannt")
-    return model
 
-def create_custom_model(layers, loss_fn, task='binary', num_classes=0):
-    return MultiLayerModel(layers, loss_fn, task, num_classes)
+class EfficientNetB0(nn.Module):
+    def __init__(self, num_classes=100):
+        super(EfficientNetB0, self).__init__()
+        self.stem = nn.Sequential(
+            ConvLayer(3, 32, kernel_size=3, stride=2, padding=1, acf=Swish()),
+            BatchNormLayer(32, dim='2d')
+        )
+        self.blocks = nn.Sequential(
+            # Block 1
+            DepthwiseSeparableConv(32, 16, kernel_size=3, padding=1, acf=Swish()),
+            BatchNormLayer(16, dim='2d'),
 
-def create_custom_vgg16(num_classes):
-    layers = [
-        ConvLayer(3, 64, kernel_size=3, padding=1),
-        ConvLayer(64, 64, kernel_size=3, padding=1),
-        PoolingLayer(kernel_size=2, stride=2, mode='max'),
+            # Block 2
+            DepthwiseSeparableConv(16, 24, kernel_size=3, stride=2, padding=1, acf=Swish()),
+            BatchNormLayer(24, dim='2d'),
 
-        ConvLayer(64, 128, kernel_size=3, padding=1),
-        ConvLayer(128, 128, kernel_size=3, padding=1),
-        PoolingLayer(kernel_size=2, stride=2, mode='max'),
+            # Block 3
+            DepthwiseSeparableConv(24, 40, kernel_size=5, stride=2, padding=2, acf=Swish()),
+            BatchNormLayer(40, dim='2d'),
 
-        ConvLayer(128, 256, kernel_size=3, padding=1),
-        ConvLayer(256, 256, kernel_size=3, padding=1),
-        ConvLayer(256, 256, kernel_size=3, padding=1),
-        PoolingLayer(kernel_size=2, stride=2, mode='max'),
+            # Block 4
+            DepthwiseSeparableConv(40, 80, kernel_size=3, stride=2, padding=1, acf=Swish()),
+            BatchNormLayer(80, dim='2d'),
 
-        ConvLayer(256, 512, kernel_size=3, padding=1),
-        ConvLayer(512, 512, kernel_size=3, padding=1),
-        ConvLayer(512, 512, kernel_size=3, padding=1),
-        PoolingLayer(kernel_size=2, stride=2, mode='max'),
+            # Block 5
+            DepthwiseSeparableConv(80, 112, kernel_size=5, padding=2, acf=Swish()),
+            BatchNormLayer(112, dim='2d'),
 
-        ConvLayer(512, 512, kernel_size=3, padding=1),
-        ConvLayer(512, 512, kernel_size=3, padding=1),
-        ConvLayer(512, 512, kernel_size=3, padding=1),
-        PoolingLayer(kernel_size=2, stride=2, mode='max'),
+            # Block 6
+            DepthwiseSeparableConv(112, 192, kernel_size=5, stride=2, padding=2, acf=Swish()),
+            BatchNormLayer(192, dim='2d'),
 
-        FlattenLayer(),
-        DenseLayer(512 * 7 * 7, 4096),
-        DropoutLayer(0.5),
-        DenseLayer(4096, 4096),
-        DropoutLayer(0.5),
-        DenseLayer(4096, num_classes, acf=f.softmax)
-    ]
-    return MultiLayerModel(layers, nn.CrossEntropyLoss(), task='multiclass', num_classes=num_classes)
+            # Block 7
+            DepthwiseSeparableConv(192, 320, kernel_size=3, padding=1, acf=Swish()),
+            BatchNormLayer(320, dim='2d'),
+        )
+        self.head = nn.Sequential(
+            ConvLayer(320, 1280, kernel_size=1, acf=Swish()),
+            BatchNormLayer(1280, dim='2d'),
+            nn.AdaptiveAvgPool2d(1),
+            FlattenLayer(),
+            DropoutLayer(0.2),
+            nn.Linear(1280, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.stem(x)
+        x = self.blocks(x)
+        x = self.head(x)
+        return x
+
+
+class Swish(nn.Module):
+    def forward(self, x):
+        return x * torch.sigmoid(x)
+
+
+class DepthwiseSeparableConv(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, acf=f.relu, init_type='he'):
+        super(DepthwiseSeparableConv, self).__init__()
+        self.depthwise = ConvLayer(in_channels, in_channels, kernel_size, stride, padding, groups=in_channels, acf=acf,
+                                   init_type=init_type)
+        self.pointwise = ConvLayer(in_channels, out_channels, kernel_size=1, acf=acf, init_type=init_type)
+
+    def forward(self, x):
+        x = self.depthwise(x)
+        x = self.pointwise(x)
+        return x

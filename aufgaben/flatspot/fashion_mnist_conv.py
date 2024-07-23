@@ -22,7 +22,7 @@ layers = [
     PoolingLayer(kernel_size=2, stride=2, mode='max'),
     FlattenLayer(),
     DenseLayer(input_dim=64*7*7, output_dim=128, acf=f.relu, init_type='he'),
-    DenseLayer(input_dim=128, output_dim=10, acf=f.softmax, init_type='he')  # Keine Aktivierungsfunktion für CrossEntropyLoss
+    DenseLayer(input_dim=128, output_dim=10, init_type='he')  # Keine Aktivierungsfunktion für CrossEntropyLoss
 ]
 criterion = nn.CrossEntropyLoss()  # Beispiel für Mehrklassenklassifikation
 

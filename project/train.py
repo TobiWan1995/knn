@@ -7,7 +7,7 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-def train_model(model, dataloaders, dataset_sizes, device, criterion, optimizer, num_epochs=25, title=None):
+def train_model(model, dataloaders, dataset_sizes, device, criterion, optimizer, scheduler, num_epochs=25, title=None):
 
     if title is None:
         title = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -20,6 +20,9 @@ def train_model(model, dataloaders, dataset_sizes, device, criterion, optimizer,
     model.to(device)  # Modell auf das Gerät (CPU oder GPU) verschieben
 
     print(f"Training on device: {device}")
+
+    best_model_wts = None
+    best_acc = 0.0
 
     for epoch in range(num_epochs):
         start_time = time.time()
@@ -75,9 +78,14 @@ def train_model(model, dataloaders, dataset_sizes, device, criterion, optimizer,
             if phase == 'train':
                 writer.add_scalar('training loss', epoch_loss, epoch)
                 writer.add_scalar('training accuracy', epoch_acc, epoch)
+                scheduler.step()
             else:
                 writer.add_scalar('validation loss', epoch_loss, epoch)
                 writer.add_scalar('validation accuracy', epoch_acc, epoch)
+
+            if phase == 'val' and epoch_acc > best_acc:
+                best_acc = epoch_acc
+                best_model_wts = model.state_dict()
 
         epoch_time = time.time() - start_time
         remaining_time = epoch_time * (num_epochs - epoch - 1)
@@ -86,9 +94,14 @@ def train_model(model, dataloaders, dataset_sizes, device, criterion, optimizer,
 
         print()
     writer.close()
+
+    if best_model_wts is not None:
+        model.load_state_dict(best_model_wts)
+
     return model
 
 def default_train_model(model, dataloaders, dataset_sizes, device, num_epochs=25, title='default_model'):
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-    return train_model(model, dataloaders, dataset_sizes, device, criterion, optimizer, num_epochs, title)
+    optimizer = optim.Adam(model.parameters(), lr=0.01)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.01)
+    return train_model(model, dataloaders, dataset_sizes, device, criterion, optimizer, scheduler, num_epochs, title)

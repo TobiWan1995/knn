@@ -13,7 +13,7 @@ data_transforms = {
         transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))
     ]),
     'val': transforms.Compose([
-        transforms.Resize(256),
+        transforms.Resize(224),
         transforms.CenterCrop(224),
         transforms.ToTensor(),
         transforms.Normalize((0.5071, 0.4867, 0.4408), (0.2675, 0.2565, 0.2761))
@@ -24,18 +24,22 @@ data_transforms = {
 train_dataset = datasets.CIFAR100(root='./datasets', train=True, download=True, transform=data_transforms['train'])
 val_dataset = datasets.CIFAR100(root='./datasets', train=False, download=True, transform=data_transforms['val'])
 
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True, num_workers=4)
-val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=4)
+# Verwende eine kleinere Teilmenge des Datensatzes
+train_subset, _ = torch.utils.data.random_split(train_dataset, [int(0.5 * len(train_dataset)), int(0.5 * len(train_dataset))])
+val_subset, _ = torch.utils.data.random_split(val_dataset, [int(0.5 * len(val_dataset)), int(0.5 * len(val_dataset))])
+
+train_loader = DataLoader(train_subset, batch_size=100, shuffle=True, num_workers=4)
+val_loader = DataLoader(val_subset, batch_size=100, shuffle=False, num_workers=4)
 
 dataloaders = {'train': train_loader, 'val': val_loader}
-dataset_sizes = {'train': len(train_dataset), 'val': len(val_dataset)}
+dataset_sizes = {'train': len(train_subset), 'val': len(val_subset)}
 class_names = train_dataset.classes
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Trainiere und evaluiere das Modell
-vgg16 = create_custom_vgg16(len(class_names))
-vgg16 = default_train_model(vgg16, dataloaders, dataset_sizes, device, num_epochs=25, title='vgg16_cifar100')
-
+cnet = EfficientNetB0(len(class_names))
+cnet = default_train_model(cnet, dataloaders, dataset_sizes, device, num_epochs=200, title='EfficientNetB0-Cifar100')
 # Speichere das trainierte Modell
-# torch.save(model.state_dict(), os.path.join(base_path, 'vgg16_flickr30k.pth'))
+base_path = os.path.dirname(os.path.abspath(__file__))  # Absoluter Pfad zum Verzeichnis dieser Datei
+torch.save(cnet.state_dict(), os.path.join(base_path, 'EfficientNetB0-Cifar100.pth'))

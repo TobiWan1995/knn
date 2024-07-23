@@ -39,8 +39,11 @@ class DenseLayer(LayerWrapper):
 
 
 class ConvLayer(LayerWrapper):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, acf=f.relu, init_type='he'):
-        layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, groups=None, acf=f.relu, init_type='he'):
+        if groups is None:
+            layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
+        else:
+            layer = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, groups=in_channels)
         super(ConvLayer, self).__init__(layer, acf, init_type)
 
 
@@ -73,9 +76,16 @@ class DropoutLayer(nn.Module):
 
 
 class BatchNormLayer(nn.Module):
-    def __init__(self, num_features):
+    def __init__(self, num_features, dim='1d'):
         super(BatchNormLayer, self).__init__()
-        self.batchnorm = nn.BatchNorm1d(num_features)
+        if dim == '1d':
+            self.batchnorm = nn.BatchNorm1d(num_features)
+        elif dim == '2d':
+            self.batchnorm = nn.BatchNorm2d(num_features)
+        elif dim == '3d':
+            self.batchnorm = nn.BatchNorm3d(num_features)
+        else:
+            raise ValueError("Unsupported dimension. Choose '1d', '2d', or '3d'.")
 
     def forward(self, x):
         return self.batchnorm(x)

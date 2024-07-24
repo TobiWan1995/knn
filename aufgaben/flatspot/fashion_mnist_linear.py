@@ -1,8 +1,39 @@
+import torch.nn as nn
+import torch.nn.functional as f
+
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
-from utils.torch.torchlayers import *
-from utils.torch.torchtrain import *
+from utils.torch.trainer import *
+
+
+class SimpleDenseNet(nn.Module):
+    def __init__(self):
+        super(SimpleDenseNet, self).__init__()
+        # Erste Dense-Schicht
+        self.fc1 = nn.Linear(28 * 28, 128)
+        nn.init.kaiming_normal_(self.fc1.weight, nonlinearity='relu')
+        if self.fc1.bias is not None:
+            nn.init.zeros_(self.fc1.bias)
+
+        # Zweite Dense-Schicht
+        self.fc2 = nn.Linear(128, 64)
+        nn.init.kaiming_normal_(self.fc2.weight, nonlinearity='relu')
+        if self.fc2.bias is not None:
+            nn.init.zeros_(self.fc2.bias)
+
+        # Dritte Dense-Schicht
+        self.fc3 = nn.Linear(64, 10)
+        nn.init.kaiming_normal_(self.fc3.weight)
+        if self.fc3.bias is not None:
+            nn.init.zeros_(self.fc3.bias)
+
+    def forward(self, x):
+        x = torch.flatten(x, 1)  # Flatten der Eingabe
+        x = f.relu(self.fc1(x))
+        x = f.relu(self.fc2(x))
+        x = self.fc3(x)  # Keine Aktivierungsfunktion für die letzte Schicht
+        return x
 
 
 # Transformation, um die Daten zu flachen
@@ -19,14 +50,5 @@ train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 valid_dataset = datasets.FashionMNIST(root='./data', train=False, download=True, transform=transform)
 valid_loader = DataLoader(valid_dataset, batch_size=32, shuffle=False)
 
-# Initialisierung des Netzwerks nur mit Linear-Layern
-layers = [
-    DenseLayer(input_dim=28*28, output_dim=128, acf=f.relu, init_type='he'),
-    DenseLayer(input_dim=128, output_dim=64, acf=f.relu, init_type='he'),
-    DenseLayer(input_dim=64, output_dim=10, init_type='he')
-]
-criterion = nn.CrossEntropyLoss()  # Beispiel für Mehrklassenklassifikation
-
-linear_model = MultiLayerModel(layers, loss_fn=criterion, task='multiclass', num_classes=10)
-
-train_torch(linear_model, train_loader, valid_loader, epochs=100, lr=0.001, title='Fashion_MNIST_Linear_100')
+trainer = Trainer(SimpleDenseNet(), nn.CrossEntropyLoss(), train_loader, valid_loader, num_classes=10, task="multiclass")
+trainer.train(epochs=100, title='Fashion_MNIST_Linear_100')

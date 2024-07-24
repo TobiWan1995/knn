@@ -8,8 +8,6 @@ times = np.load("shapes/times.npy").flatten()
 divide = np.load("shapes/divide.npy").flatten()
 ball = np.load("shapes/ball.npy").flatten()
 
-
-
 # Vorbereiten der Trainingsdaten als 2D-Array
 xtrn = np.vstack((plus, minus, times, divide, ball))  # (5, 25)
 print(xtrn)

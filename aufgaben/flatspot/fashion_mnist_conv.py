@@ -55,10 +55,10 @@ class SimpleCnnNet(nn.Module):
 
 transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
 
-train_dataset = datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform)
+train_dataset = datasets.FashionMNIST(root='../../data', train=True, download=True, transform=transform)
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
-valid_dataset = datasets.FashionMNIST(root='./data', train=False, download=True, transform=transform)
+valid_dataset = datasets.FashionMNIST(root='../../data', train=False, download=True, transform=transform)
 valid_loader = DataLoader(valid_dataset, batch_size=32, shuffle=False)
 
 trainer = Trainer(SimpleCnnNet, nn.CrossEntropyLoss(), train_loader, valid_loader, num_classes=10, task="multiclass")

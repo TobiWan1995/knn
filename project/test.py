@@ -22,8 +22,8 @@ data_transforms = {
 }
 
 # Lade den CIFAR-100 Datensatz
-train_dataset = datasets.CIFAR100(root='./datasets', train=True, download=True, transform=data_transforms['train'])
-val_dataset = datasets.CIFAR100(root='./datasets', train=False, download=True, transform=data_transforms['val'])
+train_dataset = datasets.CIFAR100(root='../data', train=True, download=True, transform=data_transforms['train'])
+val_dataset = datasets.CIFAR100(root='../data', train=False, download=True, transform=data_transforms['val'])
 
 train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True, num_workers=4)
 valid_loader = DataLoader(val_dataset, batch_size=100, shuffle=False, num_workers=4)
